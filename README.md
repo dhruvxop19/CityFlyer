@@ -37,13 +37,33 @@ const firebaseConfig = {
 };
 ```
 
-### 3. Install Dependencies
+### 3. Clerk Authentication Setup
+
+Before running the app, you need to set up Clerk authentication:
+
+1. Go to [Clerk Dashboard](https://dashboard.clerk.com/)
+2. Create a new application or use an existing one
+3. Get your publishable key from API Keys section
+4. Copy `clerk.config.example.js` to `clerk.config.js`:
+   ```bash
+   copy clerk.config.example.js clerk.config.js
+   ```
+5. Update `clerk.config.js` with your actual Clerk publishable key
+6. Enable authentication methods in Clerk dashboard:
+   - Email + Password
+   - Google OAuth (recommended)
+
+**Important:** `clerk.config.js` is in `.gitignore` and should never be committed to git!
+
+See `CLERK_SETUP.md` for detailed setup instructions.
+
+### 4. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 4. Run the App
+### 5. Run the App
 
 ```bash
 npm start
@@ -64,11 +84,17 @@ CityFlyers/
 
 ## Features
 
+- **Authentication with Clerk:**
+  - Google OAuth (one-click sign in)
+  - Email + Password sign up/sign in
+  - Email verification
+  - Secure session management
 - Location-based flyer discovery
-- Anonymous flyer posting
+- Flyer posting (authenticated users only)
 - Base64 image storage (no external storage costs)
 - Automatic flyer expiration (7 days)
 - Distance-based filtering
+- Interactive map for custom location selection
 
 ## Requirements
 
