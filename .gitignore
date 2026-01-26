@@ -33,6 +33,9 @@ yarn-error.*
 # local env files
 .env*.local
 
+# Clerk config with API keys
+clerk.config.js
+
 # typescript
 *.tsbuildinfo
 
