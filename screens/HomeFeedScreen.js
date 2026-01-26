@@ -9,6 +9,7 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { useAuth, useUser } from '@clerk/clerk-expo';
+import LogoText from '../components/LogoText';
 import FlyerService from '../services/FlyerService';
 import LocationService from '../services/LocationService';
 import { getErrorInfo, ErrorTypes } from '../utils/ErrorHandler';
@@ -190,31 +191,13 @@ const HomeFeedScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <View>
-            <Text style={styles.title}>CityFlyers.</Text>
-            <Text style={styles.subtitle}>
-              {flyers.length} flyers near you
-            </Text>
-            {user?.primaryEmailAddress && (
-              <Text style={styles.userEmail}>📍 {user.primaryEmailAddress.emailAddress.split('@')[0]}</Text>
-            )}
-          </View>
-          <View style={styles.headerButtons}>
-            <TouchableOpacity
-              style={styles.headerButton}
-              onPress={() => navigation.navigate('AddFlyer')}
-            >
-              <Text style={styles.headerButtonText}>+</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.headerButton, styles.signOutButton]}
-              onPress={() => signOut()}
-            >
-              <Text style={styles.headerButtonText}>⎋</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        <LogoText size="small" color="coral" />
+        <TouchableOpacity
+          style={styles.profileButton}
+          onPress={() => signOut()}
+        >
+          <Text style={styles.profileIcon}>👤</Text>
+        </TouchableOpacity>
       </View>
       
       <ScrollView 
@@ -235,6 +218,14 @@ const HomeFeedScreen = ({ navigation }) => {
           flyers.map(renderFlyerCard)
         )}
       </ScrollView>
+
+      {/* Floating Action Button */}
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => navigation.navigate('AddFlyer')}
+      >
+        <Text style={styles.fabIcon}>+</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -252,44 +243,56 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   header: {
-    paddingTop: 60,
-    paddingHorizontal: 20,
-    paddingBottom: 25,
-    backgroundColor: '#1a1a1a',
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-  },
-  headerContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 5,
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 12,
+    backgroundColor: '#1a1a1a',
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+  profileButton: {
+    width: 36,
+    height: 36,
+    backgroundColor: '#2a2a2a',
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileIcon: {
+    fontSize: 18,
+  },
+  fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 30,
+    width: 56,
+    height: 56,
+    backgroundColor: '#FF6B6B',
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#FF6B6B',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  fabIcon: {
     color: '#fff',
-    marginBottom: 4,
-  },
-  userEmail: {
-    fontSize: 13,
-    color: '#666',
-    marginTop: 4,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#999',
+    fontSize: 32,
+    fontWeight: '300',
+    lineHeight: 32,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    padding: 20,
+    padding: 15,
+    paddingTop: 15,
   },
   flyerCard: {
     backgroundColor: '#1a1a1a',
@@ -411,35 +414,6 @@ const styles = StyleSheet.create({
   emptyStateSubtext: {
     fontSize: 14,
     color: '#999',
-  },
-  headerButtons: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  headerButton: {
-    width: 44,
-    height: 44,
-    backgroundColor: '#FF6B6B',
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#FF6B6B',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  signOutButton: {
-    backgroundColor: '#2a2a2a',
-    shadowColor: '#000',
-  },
-  headerButtonText: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: '700',
   },
 });
 

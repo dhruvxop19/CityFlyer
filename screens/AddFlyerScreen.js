@@ -840,11 +840,11 @@ const styles = StyleSheet.create({
   headerGradient: {
     paddingTop: 50,
     paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingBottom: 15,
     backgroundColor: '#1a1a1a',
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    marginBottom: 20,
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
+    marginBottom: 15,
   },
   headerRow: {
     flexDirection: 'row',
@@ -853,14 +853,14 @@ const styles = StyleSheet.create({
   },
   cancelText: {
     color: '#FF6B6B',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
   },
   placeholder: {
-    width: 60,
+    width: 50,
   },
   title: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#fff',
