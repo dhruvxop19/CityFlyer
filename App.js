@@ -9,6 +9,7 @@ import HomeFeedScreen from './screens/HomeFeedScreen';
 import AddFlyerScreen from './screens/AddFlyerScreen';
 import FlyerDetailScreen from './screens/FlyerDetailScreen';
 import SignInScreen from './screens/SignInScreen';
+import ProfileScreen from './screens/ProfileScreen';
 
 // Token cache for Clerk
 const tokenCache = {
@@ -87,6 +88,8 @@ function AppContent() {
         return <AddFlyerScreen navigation={navigation} route={route} />;
       case 'FlyerDetail':
         return <FlyerDetailScreen navigation={navigation} route={route} />;
+      case 'Profile':
+        return <ProfileScreen navigation={navigation} route={route} />;
       default:
         return <HomeFeedScreen navigation={navigation} route={route} />;
     }

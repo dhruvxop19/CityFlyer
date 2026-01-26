@@ -9,7 +9,6 @@ import {
   ActivityIndicator,
   Dimensions,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import LocationService from '../services/LocationService';
 import { getErrorInfo } from '../utils/ErrorHandler';
 
@@ -120,16 +119,11 @@ const FlyerDetailScreen = ({ route, navigation }) => {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       {/* Back Button */}
-      <LinearGradient
-        colors={['#667eea', '#764ba2']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.backButtonTop}
-      >
+      <View style={styles.backButtonTop}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.backButtonTopText}>← Back</Text>
         </TouchableOpacity>
-      </LinearGradient>
+      </View>
 
       {/* Large Flyer Image */}
       <Image
@@ -205,7 +199,7 @@ const FlyerDetailScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#000000',
   },
   contentContainer: {
     paddingBottom: 30,
@@ -214,19 +208,10 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     paddingHorizontal: 20,
     paddingBottom: 12,
-    borderBottomLeftRadius: 25,
-    borderBottomRightRadius: 25,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    backgroundColor: '#000000',
   },
   backButtonTopText: {
-    color: '#fff',
+    color: '#FF6B6B',
     fontSize: 15,
     fontWeight: '700',
   },
@@ -234,7 +219,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#000000',
     padding: 20,
   },
   flyerImage: {
@@ -254,25 +239,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#fff',
     flex: 1,
     marginRight: 12,
   },
   distanceBadge: {
-    backgroundColor: '#667eea',
+    backgroundColor: '#FF6B6B',
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
     minWidth: 70,
     alignItems: 'center',
-    shadowColor: '#667eea',
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowOpacity: 0.4,
-    shadowRadius: 5,
-    elevation: 4,
   },
   distanceText: {
     color: '#fff',
@@ -284,41 +261,35 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   categoryBadge: {
-    backgroundColor: '#f0ebf8',
+    backgroundColor: 'rgba(255, 107, 107, 0.2)',
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#764ba2',
+    borderColor: '#FF6B6B',
   },
   categoryText: {
-    color: '#764ba2',
+    color: '#FF6B6B',
     fontSize: 14,
     fontWeight: '700',
   },
   section: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1a1a1a',
     borderRadius: 20,
     padding: 20,
     marginBottom: 16,
-    shadowColor: '#667eea',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 5,
+    borderWidth: 2,
+    borderColor: '#2a2a2a',
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: '#fff',
     marginBottom: 12,
   },
   description: {
     fontSize: 16,
-    color: '#666',
+    color: '#999',
     lineHeight: 24,
   },
   detailRow: {
@@ -327,29 +298,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#2a2a2a',
   },
   detailLabel: {
     fontSize: 14,
-    color: '#666',
+    color: '#999',
   },
   detailValue: {
     fontSize: 14,
-    color: '#333',
+    color: '#fff',
     fontWeight: '500',
   },
   errorText: {
     fontSize: 18,
-    color: '#ff3b30',
+    color: '#FF6B6B',
     textAlign: 'center',
     marginBottom: 20,
   },
   backButton: {
-    backgroundColor: '#667eea',
+    backgroundColor: '#FF6B6B',
     paddingHorizontal: 28,
     paddingVertical: 14,
     borderRadius: 25,
-    shadowColor: '#667eea',
+    shadowColor: '#FF6B6B',
     shadowOffset: {
       width: 0,
       height: 4,

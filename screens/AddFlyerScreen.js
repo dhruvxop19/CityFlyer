@@ -832,7 +832,7 @@ const AddFlyerScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f0f0f',
+    backgroundColor: '#000000',
   },
   contentContainer: {
     paddingBottom: 30,
@@ -841,7 +841,7 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     paddingHorizontal: 20,
     paddingBottom: 15,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#000000',
     borderBottomLeftRadius: 25,
     borderBottomRightRadius: 25,
     marginBottom: 15,

@@ -3,10 +3,11 @@ import { View, Text, StyleSheet } from 'react-native';
 
 const LogoText = ({ size = 'medium', style, color = 'coral' }) => {
   const sizes = {
-    small: { icon: 24, text: 16 },
-    medium: { icon: 48, text: 28 },
-    large: { icon: 64, text: 36 },
-    xlarge: { icon: 96, text: 48 },
+    xsmall: { text: 14 },
+    small: { text: 18 },
+    medium: { text: 28 },
+    large: { text: 36 },
+    xlarge: { text: 48 },
   };
 
   const colors = {

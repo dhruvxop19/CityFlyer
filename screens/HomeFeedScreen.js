@@ -191,10 +191,10 @@ const HomeFeedScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <LogoText size="small" color="coral" />
+        <LogoText size="medium" color="coral" />
         <TouchableOpacity
           style={styles.profileButton}
-          onPress={() => signOut()}
+          onPress={() => navigation.navigate('Profile')}
         >
           <Text style={styles.profileIcon}>👤</Text>
         </TouchableOpacity>
@@ -233,13 +233,13 @@ const HomeFeedScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f0f0f',
+    backgroundColor: '#000000',
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#0f0f0f',
+    backgroundColor: '#000000',
     padding: 20,
   },
   header: {
@@ -249,18 +249,18 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     paddingHorizontal: 20,
     paddingBottom: 12,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#000000',
   },
   profileButton: {
-    width: 36,
-    height: 36,
+    width: 32,
+    height: 32,
     backgroundColor: '#2a2a2a',
-    borderRadius: 18,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
   profileIcon: {
-    fontSize: 18,
+    fontSize: 16,
   },
   fab: {
     position: 'absolute',

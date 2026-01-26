@@ -302,7 +302,7 @@ const SignInScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f0f0f',
+    backgroundColor: '#000000',
   },
   scrollContent: {
     flexGrow: 1,
@@ -401,7 +401,7 @@ const styles = StyleSheet.create({
   },
   input: {
     width: '100%',
-    backgroundColor: '#0f0f0f',
+    backgroundColor: '#000000',
     borderWidth: 0,
     borderRadius: 15,
     paddingVertical: 16,
