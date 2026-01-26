@@ -21,6 +21,7 @@ import * as Location from 'expo-location';
 import LocationService from '../services/LocationService';
 import FlyerService from '../services/FlyerService';
 import { getErrorInfo, ErrorTypes } from '../utils/ErrorHandler';
+import BottomNav from '../components/BottomNav';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -554,8 +555,19 @@ const AddFlyerScreen = ({ navigation }) => {
     }
   };
 
+  const handleTabPress = (tab) => {
+    if (tab === 'home') {
+      navigation.navigate('HomeFeed');
+    } else if (tab === 'create') {
+      // Already on create
+    } else if (tab === 'settings') {
+      navigation.navigate('Settings');
+    }
+  };
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+    <View style={{ flex: 1, backgroundColor: '#000000' }}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <LinearGradient
         colors={['#667eea', '#764ba2']}
         start={{ x: 0, y: 0 }}
@@ -826,6 +838,8 @@ const AddFlyerScreen = ({ navigation }) => {
         </View>
       </Modal>
     </ScrollView>
+    <BottomNav activeTab="create" onTabPress={handleTabPress} />
+    </View>
   );
 };
 

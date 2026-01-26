@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import LogoText from '../components/LogoText';
+import BottomNav from '../components/BottomNav';
 import FlyerService from '../services/FlyerService';
 import LocationService from '../services/LocationService';
 import { getErrorInfo, ErrorTypes } from '../utils/ErrorHandler';
@@ -100,6 +101,16 @@ const HomeFeedScreen = ({ navigation }) => {
 
   const handleFlyerPress = (flyer) => {
     navigation.navigate('FlyerDetail', { flyer });
+  };
+
+  const handleTabPress = (tab) => {
+    if (tab === 'home') {
+      // Already on home
+    } else if (tab === 'create') {
+      navigation.navigate('AddFlyer');
+    } else if (tab === 'settings') {
+      navigation.navigate('Settings');
+    }
   };
 
   const renderFlyerCard = (flyer) => {
@@ -194,7 +205,7 @@ const HomeFeedScreen = ({ navigation }) => {
         <LogoText size="medium" color="coral" />
         <TouchableOpacity
           style={styles.profileButton}
-          onPress={() => navigation.navigate('Profile')}
+          onPress={() => navigation.navigate('Settings')}
         >
           <Text style={styles.profileIcon}>👤</Text>
         </TouchableOpacity>
@@ -219,13 +230,7 @@ const HomeFeedScreen = ({ navigation }) => {
         )}
       </ScrollView>
 
-      {/* Floating Action Button */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => navigation.navigate('AddFlyer')}
-      >
-        <Text style={styles.fabIcon}>+</Text>
-      </TouchableOpacity>
+      <BottomNav activeTab="home" onTabPress={handleTabPress} />
     </View>
   );
 };
@@ -262,37 +267,13 @@ const styles = StyleSheet.create({
   profileIcon: {
     fontSize: 16,
   },
-  fab: {
-    position: 'absolute',
-    right: 20,
-    bottom: 30,
-    width: 56,
-    height: 56,
-    backgroundColor: '#FF6B6B',
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#FF6B6B',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.5,
-    shadowRadius: 12,
-    elevation: 8,
-  },
-  fabIcon: {
-    color: '#fff',
-    fontSize: 32,
-    fontWeight: '300',
-    lineHeight: 32,
-  },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     padding: 15,
     paddingTop: 15,
+    paddingBottom: 100,
   },
   flyerCard: {
     backgroundColor: '#1a1a1a',
@@ -411,9 +392,16 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     marginBottom: 8,
   },
-  emptyStateSubtext: {
-    fontSize: 14,
-    color: '#999',
+  profileButton: {
+    width: 36,
+    height: 36,
+    backgroundColor: '#2a2a2a',
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileIcon: {
+    fontSize: 18,
   },
 });
 
