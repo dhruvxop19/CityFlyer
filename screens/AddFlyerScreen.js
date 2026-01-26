@@ -11,6 +11,8 @@ import {
   ActivityIndicator,
   Modal,
   Dimensions,
+  Platform,
+  Linking,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import * as ImagePicker from 'expo-image-picker';
@@ -107,6 +109,41 @@ const AddFlyerScreen = ({ navigation }) => {
     setShowMapModal(true);
   };
 
+  const openNativeMaps = async () => {
+    // Get current location
+    const locationResult = await LocationService.getCurrentLocation();
+    const lat = locationResult.location?.latitude || 40.7580;
+    const lng = locationResult.location?.longitude || -73.9855;
+    
+    // Open native maps app based on platform
+    const scheme = Platform.select({
+      ios: `maps:0,0?q=Select+Location@${lat},${lng}`,
+      android: `geo:0,0?q=${lat},${lng}(Select+Location)`,
+    });
+    
+    const url = Platform.select({
+      ios: `http://maps.apple.com/?ll=${lat},${lng}&q=Select+Location`,
+      android: `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`,
+    });
+
+    try {
+      const supported = await Linking.canOpenURL(scheme);
+      if (supported) {
+        await Linking.openURL(scheme);
+        Alert.alert(
+          'Select Location',
+          'After selecting your location in Maps, please manually enter the coordinates here.',
+          [{ text: 'OK' }]
+        );
+      } else {
+        await Linking.openURL(url);
+      }
+    } catch (error) {
+      console.error('Error opening maps:', error);
+      Alert.alert('Error', 'Could not open maps application');
+    }
+  };
+
   const handleMapMessage = (event) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
@@ -124,6 +161,7 @@ const AddFlyerScreen = ({ navigation }) => {
   };
 
   const getMapHTML = () => {
+    const mapProvider = Platform.OS === 'ios' ? 'Google Maps' : 'Google Maps';
     return `
 <!DOCTYPE html>
 <html>
@@ -145,6 +183,19 @@ const AddFlyerScreen = ({ navigation }) => {
       font-family: Arial, sans-serif;
       font-size: 14px;
     }
+    .platform-badge {
+      position: absolute;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: ${Platform.OS === 'ios' ? '#007AFF' : '#34A853'};
+      color: white;
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      z-index: 1000;
+    }
     .confirm-btn {
       position: absolute;
       bottom: 20px;
@@ -165,6 +216,7 @@ const AddFlyerScreen = ({ navigation }) => {
 </head>
 <body>
   <div class="instructions">Tap on the map to select a location</div>
+  <div class="platform-badge">${mapProvider}</div>
   <div id="map"></div>
   <button class="confirm-btn" onclick="confirmLocation()">Confirm Location</button>
   
@@ -469,8 +521,19 @@ const AddFlyerScreen = ({ navigation }) => {
             style={styles.mapButton} 
             onPress={openMapPicker}
           >
-            <Text style={styles.mapButtonText}>🗺️ Select on Interactive Map</Text>
+            <Text style={styles.mapButtonText}>
+              {Platform.OS === 'ios' ? '🗺️ Select on Map (Google)' : '🗺️ Select on Interactive Map'}
+            </Text>
           </TouchableOpacity>
+
+          {Platform.OS === 'ios' && (
+            <TouchableOpacity 
+              style={[styles.mapButton, styles.appleMapsButton]} 
+              onPress={openNativeMaps}
+            >
+              <Text style={styles.mapButtonText}>🍎 Open Apple Maps</Text>
+            </TouchableOpacity>
+          )}
           
           <Text style={styles.orText}>OR</Text>
           
@@ -798,6 +861,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginBottom: 12,
+  },
+  appleMapsButton: {
+    backgroundColor: '#000',
   },
   mapButtonText: {
     color: '#fff',
