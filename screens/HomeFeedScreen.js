@@ -6,7 +6,7 @@ import {
   ScrollView, 
   Image, 
   TouchableOpacity, 
-  ActivityIndicator 
+  ActivityIndicator
 } from 'react-native';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import FlyerService from '../services/FlyerService';
@@ -190,11 +190,14 @@ const HomeFeedScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.headerRow}>
+        <View style={styles.headerContent}>
           <View>
-            <Text style={styles.title}>City Flyers</Text>
+            <Text style={styles.title}>CityFlyers.</Text>
+            <Text style={styles.subtitle}>
+              {flyers.length} flyers near you
+            </Text>
             {user?.primaryEmailAddress && (
-              <Text style={styles.userEmail}>{user.primaryEmailAddress.emailAddress}</Text>
+              <Text style={styles.userEmail}>📍 {user.primaryEmailAddress.emailAddress.split('@')[0]}</Text>
             )}
           </View>
           <View style={styles.headerButtons}>
@@ -202,19 +205,16 @@ const HomeFeedScreen = ({ navigation }) => {
               style={styles.headerButton}
               onPress={() => navigation.navigate('AddFlyer')}
             >
-              <Text style={styles.headerButtonText}>+ Add</Text>
+              <Text style={styles.headerButtonText}>+</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.headerButton, styles.signOutButton]}
               onPress={() => signOut()}
             >
-              <Text style={styles.headerButtonText}>Sign Out</Text>
+              <Text style={styles.headerButtonText}>⎋</Text>
             </TouchableOpacity>
           </View>
         </View>
-        <Text style={styles.subtitle}>
-          {flyers.length} flyers near you
-        </Text>
       </View>
       
       <ScrollView 
@@ -242,22 +242,27 @@ const HomeFeedScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#0f0f0f',
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#0f0f0f',
     padding: 20,
   },
   header: {
-    backgroundColor: '#fff',
     paddingTop: 60,
     paddingHorizontal: 20,
-    paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    paddingBottom: 25,
+    backgroundColor: '#1a1a1a',
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
   headerRow: {
     flexDirection: 'row',
@@ -268,41 +273,36 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#fff',
+    marginBottom: 4,
   },
   userEmail: {
     fontSize: 13,
     color: '#666',
-    marginTop: 2,
+    marginTop: 4,
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: '#999',
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    padding: 15,
+    padding: 20,
   },
   flyerCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: '#1a1a1a',
+    borderRadius: 25,
+    marginBottom: 20,
     overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#2a2a2a',
   },
   flyerImage: {
     width: '100%',
-    height: 200,
-    backgroundColor: '#f0f0f0',
+    height: 220,
+    backgroundColor: '#0f0f0f',
   },
   flyerContent: {
     padding: 15,
@@ -316,40 +316,40 @@ const styles = StyleSheet.create({
   flyerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: '#fff',
     flex: 1,
     marginRight: 10,
   },
   distanceBadge: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+    backgroundColor: '#FF6B6B',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
   },
   distanceText: {
     color: '#fff',
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '700',
   },
   flyerCategory: {
     fontSize: 14,
-    color: '#007AFF',
-    fontWeight: '500',
+    color: '#FF6B6B',
+    fontWeight: '600',
     marginBottom: 8,
   },
   flyerDescription: {
     fontSize: 14,
-    color: '#666',
+    color: '#999',
     lineHeight: 20,
   },
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    color: '#666',
+    color: '#999',
   },
   errorText: {
     fontSize: 16,
-    color: '#666',
+    color: '#999',
     textAlign: 'center',
     marginBottom: 20,
     paddingHorizontal: 20,
@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#333',
+    color: '#fff',
     textAlign: 'center',
     marginBottom: 8,
   },
@@ -375,12 +375,20 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   retryButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-    minWidth: 120,
+    backgroundColor: '#FF6B6B',
+    paddingHorizontal: 28,
+    paddingVertical: 14,
+    borderRadius: 25,
+    minWidth: 140,
     alignItems: 'center',
+    shadowColor: '#FF6B6B',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 5,
   },
   retryButtonDisabled: {
     backgroundColor: '#ccc',
@@ -396,31 +404,42 @@ const styles = StyleSheet.create({
   },
   emptyStateText: {
     fontSize: 18,
-    color: '#333',
+    color: '#fff',
     fontWeight: '500',
     marginBottom: 8,
   },
   emptyStateSubtext: {
     fontSize: 14,
-    color: '#666',
+    color: '#999',
   },
   headerButtons: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 10,
   },
   headerButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: '#007AFF',
-    borderRadius: 8,
+    width: 44,
+    height: 44,
+    backgroundColor: '#FF6B6B',
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#FF6B6B',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 5,
   },
   signOutButton: {
-    backgroundColor: '#FF3B30',
+    backgroundColor: '#2a2a2a',
+    shadowColor: '#000',
   },
   headerButtonText: {
     color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: '700',
   },
 });
 

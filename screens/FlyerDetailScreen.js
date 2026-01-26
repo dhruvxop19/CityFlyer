@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Dimensions,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import LocationService from '../services/LocationService';
 import { getErrorInfo } from '../utils/ErrorHandler';
 
@@ -119,9 +120,16 @@ const FlyerDetailScreen = ({ route, navigation }) => {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       {/* Back Button */}
-      <TouchableOpacity style={styles.backButtonTop} onPress={() => navigation.goBack()}>
-        <Text style={styles.backButtonTopText}>← Back</Text>
-      </TouchableOpacity>
+      <LinearGradient
+        colors={['#667eea', '#764ba2']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.backButtonTop}
+      >
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Text style={styles.backButtonTopText}>← Back</Text>
+        </TouchableOpacity>
+      </LinearGradient>
 
       {/* Large Flyer Image */}
       <Image
@@ -197,24 +205,36 @@ const FlyerDetailScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f8f9fa',
   },
   contentContainer: {
     paddingBottom: 30,
   },
   backButtonTop: {
-    padding: 15,
-    backgroundColor: '#fff',
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 15,
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
   backButtonTopText: {
-    color: '#007AFF',
+    color: '#fff',
     fontSize: 16,
+    fontWeight: '700',
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f8f9fa',
     padding: 20,
   },
   flyerImage: {
@@ -239,46 +259,56 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   distanceBadge: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    minWidth: 60,
+    backgroundColor: '#667eea',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    minWidth: 70,
     alignItems: 'center',
+    shadowColor: '#667eea',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.4,
+    shadowRadius: 5,
+    elevation: 4,
   },
   distanceText: {
     color: '#fff',
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   categoryContainer: {
     flexDirection: 'row',
     marginBottom: 20,
   },
   categoryBadge: {
-    backgroundColor: '#e8f4fd',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+    backgroundColor: '#f0ebf8',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#764ba2',
   },
   categoryText: {
-    color: '#007AFF',
+    color: '#764ba2',
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '700',
   },
   section: {
     backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 20,
+    padding: 20,
     marginBottom: 16,
-    shadowColor: '#000',
+    shadowColor: '#667eea',
     shadowOffset: {
       width: 0,
-      height: 1,
+      height: 4,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
   },
   sectionTitle: {
     fontSize: 16,
@@ -315,15 +345,23 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   backButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
+    backgroundColor: '#667eea',
+    paddingHorizontal: 28,
+    paddingVertical: 14,
+    borderRadius: 25,
+    shadowColor: '#667eea',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 5,
   },
   backButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '700',
   },
   headerButton: {
     marginLeft: 15,

@@ -14,6 +14,7 @@ import {
   Platform,
   Linking,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { WebView } from 'react-native-webview';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
@@ -555,13 +556,20 @@ const AddFlyerScreen = ({ navigation }) => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <View style={styles.headerRow}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.cancelText}>Cancel</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Create New Flyer</Text>
-        <View style={styles.placeholder} />
-      </View>
+      <LinearGradient
+        colors={['#667eea', '#764ba2']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.headerGradient}
+      >
+        <View style={styles.headerRow}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Text style={styles.cancelText}>Cancel</Text>
+          </TouchableOpacity>
+          <Text style={styles.title}>Create New Flyer</Text>
+          <View style={styles.placeholder} />
+        </View>
+      </LinearGradient>
 
       {/* Image Picker */}
       <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
@@ -824,49 +832,68 @@ const AddFlyerScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#0f0f0f',
   },
   contentContainer: {
-    padding: 20,
+    paddingBottom: 30,
+  },
+  headerGradient: {
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    backgroundColor: '#1a1a1a',
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    marginBottom: 20,
   },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
   },
   cancelText: {
-    color: '#007AFF',
+    color: '#FF6B6B',
     fontSize: 16,
+    fontWeight: '600',
   },
   placeholder: {
-    width: 50,
+    width: 60,
   },
   title: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
     textAlign: 'center',
+    color: '#fff',
   },
   imagePicker: {
     marginBottom: 20,
-    borderRadius: 10,
+    marginHorizontal: 20,
+    borderRadius: 20,
     overflow: 'hidden',
+    shadowColor: '#667eea',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
   },
   selectedImage: {
     width: '100%',
-    height: 200,
+    height: 220,
     resizeMode: 'cover',
   },
   imagePlaceholder: {
     width: '100%',
-    height: 200,
-    backgroundColor: '#f0f0f0',
+    height: 220,
+    backgroundColor: '#f8f9fa',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#ddd',
+    borderWidth: 3,
+    borderColor: '#667eea',
     borderStyle: 'dashed',
-    borderRadius: 10,
+    borderRadius: 20,
   },
   imagePlaceholderText: {
     color: '#888',
@@ -874,18 +901,28 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
+    fontWeight: '700',
+    marginBottom: 10,
+    marginHorizontal: 20,
     color: '#333',
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+    borderRadius: 15,
+    padding: 14,
     fontSize: 16,
     marginBottom: 16,
-    backgroundColor: '#fafafa',
+    marginHorizontal: 20,
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   textArea: {
     height: 100,
@@ -894,35 +931,58 @@ const styles = StyleSheet.create({
   optionsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginBottom: 16,
-    gap: 8,
+    marginBottom: 20,
+    marginHorizontal: 20,
+    gap: 10,
   },
   optionButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: '#fafafa',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   optionButtonSelected: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
+    backgroundColor: '#667eea',
+    borderColor: '#667eea',
+    shadowColor: '#667eea',
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
   },
   optionText: {
     fontSize: 14,
     color: '#333',
+    fontWeight: '600',
   },
   optionTextSelected: {
     color: '#fff',
-    fontWeight: '600',
+    fontWeight: '700',
   },
   submitButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 16,
-    borderRadius: 10,
+    backgroundColor: '#667eea',
+    paddingVertical: 18,
+    borderRadius: 25,
     alignItems: 'center',
     marginTop: 20,
+    marginHorizontal: 20,
+    shadowColor: '#667eea',
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 8,
   },
   submitButtonDisabled: {
     backgroundColor: '#ccc',
@@ -930,7 +990,7 @@ const styles = StyleSheet.create({
   submitButtonText: {
     color: '#fff',
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   submittingContainer: {
     flexDirection: 'row',
@@ -953,6 +1013,7 @@ const styles = StyleSheet.create({
   },
   customLocationContainer: {
     marginBottom: 16,
+    marginHorizontal: 20,
   },
   sectionTitle: {
     fontSize: 15,
@@ -969,10 +1030,18 @@ const styles = StyleSheet.create({
   },
   searchButton: {
     backgroundColor: '#34c759',
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingVertical: 14,
+    borderRadius: 20,
     alignItems: 'center',
     marginBottom: 12,
+    shadowColor: '#34c759',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
   },
   searchButtonDisabled: {
     backgroundColor: '#ccc',
@@ -1004,11 +1073,19 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   setCoordinatesButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 12,
-    borderRadius: 8,
+    backgroundColor: '#667eea',
+    paddingVertical: 14,
+    borderRadius: 20,
     alignItems: 'center',
     marginBottom: 12,
+    shadowColor: '#667eea',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
   },
   setCoordinatesButtonText: {
     color: '#fff',
@@ -1017,13 +1094,22 @@ const styles = StyleSheet.create({
   },
   mapButton: {
     backgroundColor: '#FF9500',
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingVertical: 14,
+    borderRadius: 20,
     alignItems: 'center',
     marginBottom: 12,
+    shadowColor: '#FF9500',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
   },
   appleMapsButton: {
     backgroundColor: '#000',
+    shadowColor: '#000',
   },
   mapButtonText: {
     color: '#fff',

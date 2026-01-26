@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useSignIn, useSignUp, useOAuth } from '@clerk/clerk-expo';
 import * as WebBrowser from 'expo-web-browser';
+import LogoText from '../components/LogoText';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -130,7 +131,7 @@ const SignInScreen = () => {
   if (!signInLoaded || !signUpLoaded) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color="#FF6B6B" />
       </View>
     );
   }
@@ -142,16 +143,20 @@ const SignInScreen = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={styles.content}>
-            <Text style={styles.logo}>📧</Text>
-            <Text style={styles.title}>Verify Your Email</Text>
-            <Text style={styles.subtitle}>
-              We sent a verification code to {email}
+          <View style={styles.backgroundPattern} />
+          
+          <View style={styles.card}>
+            <LogoText size="large" color="coral" style={styles.logo} />
+
+            <Text style={styles.verificationText}>
+              We sent a verification code to
             </Text>
+            <Text style={styles.emailText}>{email}</Text>
 
             <TextInput
               style={styles.input}
               placeholder="Enter verification code"
+              placeholderTextColor="#8B7355"
               value={code}
               onChangeText={setCode}
               keyboardType="number-pad"
@@ -160,14 +165,14 @@ const SignInScreen = () => {
             />
 
             <TouchableOpacity 
-              style={[styles.button, isLoading && styles.buttonDisabled]}
+              style={[styles.signInButton, isLoading && styles.buttonDisabled]}
               onPress={handleVerifyEmail}
               disabled={isLoading}
             >
               {isLoading ? (
-                <ActivityIndicator size="small" color="#fff" />
+                <ActivityIndicator size="small" color="#000" />
               ) : (
-                <Text style={styles.buttonText}>Verify Email</Text>
+                <Text style={styles.signInButtonText}>Verify Email</Text>
               )}
             </TouchableOpacity>
 
@@ -178,7 +183,9 @@ const SignInScreen = () => {
                 setCode('');
               }}
             >
-              <Text style={styles.linkText}>Back to Sign Up</Text>
+              <Text style={styles.linkText}>
+                Back to <Text style={styles.linkTextBold}>Sign Up</Text>
+              </Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -192,12 +199,25 @@ const SignInScreen = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.content}>
-          <Text style={styles.logo}>📍</Text>
-          <Text style={styles.title}>City Flyers</Text>
-          <Text style={styles.subtitle}>
-            {isSignUp ? 'Create your account' : 'Sign in to your account'}
-          </Text>
+        <View style={styles.backgroundPattern} />
+        
+        <View style={styles.card}>
+          <LogoText size="large" color="coral" style={styles.logo} />
+
+          <TouchableOpacity 
+            style={[styles.appleButton, isGoogleLoading && styles.buttonDisabled]}
+            onPress={handleGoogleSignIn}
+            disabled={isGoogleLoading}
+          >
+            {isGoogleLoading ? (
+              <ActivityIndicator size="small" color="#D4AF37" />
+            ) : (
+              <>
+                <Text style={styles.appleIcon}>🍎</Text>
+                <Text style={styles.appleButtonText}>Continue with Apple</Text>
+              </>
+            )}
+          </TouchableOpacity>
 
           <TouchableOpacity 
             style={[styles.googleButton, isGoogleLoading && styles.buttonDisabled]}
@@ -205,7 +225,7 @@ const SignInScreen = () => {
             disabled={isGoogleLoading}
           >
             {isGoogleLoading ? (
-              <ActivityIndicator size="small" color="#333" />
+              <ActivityIndicator size="small" color="#D4AF37" />
             ) : (
               <>
                 <Text style={styles.googleIcon}>G</Text>
@@ -216,13 +236,14 @@ const SignInScreen = () => {
 
           <View style={styles.divider}>
             <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>OR</Text>
+            <Text style={styles.dividerText}>or</Text>
             <View style={styles.dividerLine} />
           </View>
 
           <TextInput
             style={styles.input}
             placeholder="Email"
+            placeholderTextColor="#8B7355"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -233,6 +254,7 @@ const SignInScreen = () => {
           <TextInput
             style={styles.input}
             placeholder="Password"
+            placeholderTextColor="#8B7355"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -241,14 +263,14 @@ const SignInScreen = () => {
           />
 
           <TouchableOpacity 
-            style={[styles.button, isLoading && styles.buttonDisabled]}
+            style={[styles.signInButton, isLoading && styles.buttonDisabled]}
             onPress={isSignUp ? handleSignUp : handleSignIn}
             disabled={isLoading}
           >
             {isLoading ? (
-              <ActivityIndicator size="small" color="#fff" />
+              <ActivityIndicator size="small" color="#000" />
             ) : (
-              <Text style={styles.buttonText}>
+              <Text style={styles.signInButtonText}>
                 {isSignUp ? 'Sign Up' : 'Sign In'}
               </Text>
             )}
@@ -264,16 +286,13 @@ const SignInScreen = () => {
           >
             <Text style={styles.linkText}>
               {isSignUp 
-                ? 'Already have an account? Sign In' 
-                : "Don't have an account? Sign Up"}
+                ? 'Already have an account? ' 
+                : "Don't have an account? "}
+              <Text style={styles.linkTextBold}>
+                {isSignUp ? 'Sign in' : 'Sign up'}
+              </Text>
             </Text>
           </TouchableOpacity>
-
-          <Text style={styles.infoText}>
-            {isSignUp 
-              ? 'Create an account to post and manage flyers' 
-              : 'Sign in to post flyers and manage your content'}
-          </Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -283,87 +302,85 @@ const SignInScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#0f0f0f',
   },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 40,
+    paddingHorizontal: 20,
   },
-  content: {
-    alignItems: 'center',
-    paddingHorizontal: 40,
+  backgroundPattern: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 0.03,
+  },
+  card: {
     width: '100%',
     maxWidth: 400,
+    backgroundColor: '#1a1a1a',
+    borderRadius: 30,
+    padding: 30,
+    borderWidth: 2,
+    borderColor: '#2a2a2a',
   },
   logo: {
-    fontSize: 80,
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
     marginBottom: 40,
   },
-  input: {
-    width: '100%',
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    marginBottom: 16,
-  },
-  button: {
-    backgroundColor: '#007AFF',
+  appleButton: {
+    backgroundColor: '#1a1a1a',
     paddingVertical: 16,
-    paddingHorizontal: 40,
-    borderRadius: 10,
+    paddingHorizontal: 20,
+    borderRadius: 25,
     width: '100%',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#2a2a2a',
+  },
+  appleIcon: {
+    fontSize: 18,
+    marginRight: 10,
+  },
+  appleButtonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
   googleButton: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FF6B6B',
     paddingVertical: 16,
-    paddingHorizontal: 40,
-    borderRadius: 10,
+    paddingHorizontal: 20,
+    borderRadius: 25,
     width: '100%',
     alignItems: 'center',
     marginBottom: 20,
     flexDirection: 'row',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
+    shadowColor: '#FF6B6B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 6,
   },
   googleIcon: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginRight: 12,
-    color: '#4285F4',
+    marginRight: 10,
+    color: '#fff',
   },
   googleButtonText: {
-    color: '#333',
-    fontSize: 16,
+    color: '#fff',
+    fontSize: 15,
     fontWeight: '600',
+    letterSpacing: 0.5,
   },
   divider: {
     flexDirection: 'row',
@@ -374,36 +391,73 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#ddd',
+    backgroundColor: '#2a2a2a',
   },
   dividerText: {
     marginHorizontal: 16,
-    color: '#888',
-    fontSize: 14,
+    color: '#666',
+    fontSize: 13,
     fontWeight: '500',
   },
-  buttonDisabled: {
-    backgroundColor: '#ccc',
-  },
-  buttonText: {
+  input: {
+    width: '100%',
+    backgroundColor: '#0f0f0f',
+    borderWidth: 0,
+    borderRadius: 15,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    fontSize: 15,
     color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
+    marginBottom: 16,
+  },
+  signInButton: {
+    backgroundColor: '#FF6B6B',
+    paddingVertical: 18,
+    paddingHorizontal: 40,
+    borderRadius: 25,
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 20,
+    shadowColor: '#FF6B6B',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  signInButtonText: {
+    color: '#fff',
+    fontSize: 17,
+    fontWeight: '700',
+    letterSpacing: 1,
+  },
+  buttonDisabled: {
+    opacity: 0.5,
   },
   linkButton: {
     paddingVertical: 8,
-    marginBottom: 20,
+    alignItems: 'center',
   },
   linkText: {
-    color: '#007AFF',
-    fontSize: 15,
+    color: '#666',
+    fontSize: 14,
     textAlign: 'center',
   },
-  infoText: {
+  linkTextBold: {
+    color: '#FF6B6B',
+    fontWeight: '700',
+  },
+  verificationText: {
+    color: '#666',
     fontSize: 14,
-    color: '#888',
     textAlign: 'center',
-    maxWidth: 280,
+    marginBottom: 8,
+  },
+  emailText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 25,
   },
 });
 
