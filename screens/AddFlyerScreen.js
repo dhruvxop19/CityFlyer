@@ -46,6 +46,7 @@ const AddFlyerScreen = ({ navigation }) => {
   const [isGeocodingAddress, setIsGeocodingAddress] = useState(false);
   const [manualLat, setManualLat] = useState('');
   const [manualLng, setManualLng] = useState('');
+  const [tempMapLocation, setTempMapLocation] = useState(null);
   const [showMapModal, setShowMapModal] = useState(false);
   const [mapCenter, setMapCenter] = useState({ lat: 40.7580, lng: -73.9855 });
 
@@ -147,13 +148,11 @@ const AddFlyerScreen = ({ navigation }) => {
   const handleMapMessage = (event) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
-      if (data.type === 'locationSelected') {
-        setCustomLocation({
+      if (data.type === 'locationSelected' || data.type === 'locationUpdate') {
+        setTempMapLocation({
           latitude: data.latitude,
           longitude: data.longitude,
         });
-        setShowMapModal(false);
-        Alert.alert('Location Selected', `Coordinates:\nLatitude: ${data.latitude.toFixed(6)}\nLongitude: ${data.longitude.toFixed(6)}`);
       }
     } catch (error) {
       console.error('Error parsing map message:', error);
@@ -161,31 +160,92 @@ const AddFlyerScreen = ({ navigation }) => {
   };
 
   const getMapHTML = () => {
-    const mapProvider = Platform.OS === 'ios' ? 'Google Maps' : 'Google Maps';
+    const mapProvider = Platform.OS === 'ios' ? 'OpenStreetMap' : 'OpenStreetMap';
     return `
 <!DOCTYPE html>
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    body, html { margin: 0; padding: 0; height: 100%; }
-    #map { height: 100%; width: 100%; }
-    .instructions {
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body, html { 
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      position: relative;
+    }
+    #map { 
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 100%;
+      width: 100%;
+    }
+    
+    /* Move Leaflet zoom controls to right side, away from search */
+    .leaflet-control-zoom {
+      margin-right: 10px !important;
+      margin-top: 80px !important;
+    }
+    
+    .search-container {
       position: absolute;
       top: 10px;
+      left: 10px;
+      right: 10px;
+      z-index: 1000;
+      display: flex;
+      gap: 8px;
+    }
+    .search-input {
+      flex: 1;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      background: white;
+    }
+    .search-btn {
+      padding: 12px 20px;
+      background: #007AFF;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .search-btn:active {
+      background: #0056b3;
+    }
+    .instructions {
+      position: absolute;
+      top: 70px;
       left: 50%;
       transform: translateX(-50%);
       background: white;
-      padding: 10px 20px;
+      padding: 8px 16px;
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
       z-index: 1000;
       font-family: Arial, sans-serif;
-      font-size: 14px;
+      font-size: 12px;
+      max-width: 80%;
+      text-align: center;
     }
     .platform-badge {
       position: absolute;
-      top: 60px;
+      top: 110px;
       left: 50%;
       transform: translateX(-50%);
       background: ${Platform.OS === 'ios' ? '#007AFF' : '#34A853'};
@@ -196,68 +256,147 @@ const AddFlyerScreen = ({ navigation }) => {
       font-weight: 600;
       z-index: 1000;
     }
-    .confirm-btn {
+    .button-container {
       position: absolute;
       bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
+      left: 0;
+      right: 0;
+      padding: 0 15px;
+      z-index: 10000;
+      pointer-events: none;
+      display: flex;
+      justify-content: center;
+    }
+    .confirm-btn {
+      width: 100%;
+      max-width: 300px;
       background: #007AFF;
       color: white;
-      padding: 12px 24px;
+      padding: 16px 32px;
       border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 600;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      z-index: 1000;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: 700;
+      box-shadow: 0 6px 20px rgba(0,122,255,0.5);
       cursor: pointer;
+      pointer-events: auto;
+      text-align: center;
+    }
+    .confirm-btn:active {
+      background: #0056b3;
+      transform: scale(0.98);
+    }
+    .loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 16px 24px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      z-index: 2000;
+      font-size: 14px;
+    }
+    .hidden {
+      display: none !important;
     }
   </style>
 </head>
 <body>
-  <div class="instructions">Tap on the map to select a location</div>
+  <div class="search-container">
+    <input type="text" id="searchInput" class="search-input" placeholder="Search location..." />
+    <button onclick="searchLocation()" class="search-btn">🔍</button>
+  </div>
+  <div class="instructions">Tap on the map or search to select a location</div>
   <div class="platform-badge">${mapProvider}</div>
+  <div id="loading" class="loading hidden">Searching...</div>
   <div id="map"></div>
-  <button class="confirm-btn" onclick="confirmLocation()">Confirm Location</button>
   
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBg4AcujbKNc2eirrbmVvsWG0LjwVaLGI8"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     let map;
     let marker;
     let selectedLocation = null;
     
-    function initMap() {
-      const center = { lat: ${mapCenter.lat}, lng: ${mapCenter.lng} };
+    // Initialize map
+    const center = [${mapCenter.lat}, ${mapCenter.lng}];
+    
+    map = L.map('map').setView(center, 13);
+    
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 19
+    }).addTo(map);
+    
+    // Add marker
+    marker = L.marker(center, { draggable: true }).addTo(map);
+    selectedLocation = { lat: center[0], lng: center[1] };
+    
+    // Handle map click
+    map.on('click', function(e) {
+      const lat = e.latlng.lat;
+      const lng = e.latlng.lng;
+      marker.setLatLng([lat, lng]);
+      selectedLocation = { lat, lng };
+      window.ReactNativeWebView.postMessage(JSON.stringify({
+        type: 'locationUpdate',
+        latitude: lat,
+        longitude: lng,
+      }));
+    });
+    
+    // Handle marker drag
+    marker.on('dragend', function(e) {
+      const position = marker.getLatLng();
+      selectedLocation = { lat: position.lat, lng: position.lng };
+      window.ReactNativeWebView.postMessage(JSON.stringify({
+        type: 'locationUpdate',
+        latitude: selectedLocation.lat,
+        longitude: selectedLocation.lng,
+      }));
+    });
+    
+    // Search functionality
+    async function searchLocation() {
+      const query = document.getElementById('searchInput').value.trim();
+      if (!query) return;
       
-      map = new google.maps.Map(document.getElementById('map'), {
-        center: center,
-        zoom: 13,
-        mapTypeControl: true,
-        streetViewControl: false,
-        fullscreenControl: false,
-      });
+      const loading = document.getElementById('loading');
+      loading.classList.remove('hidden');
       
-      marker = new google.maps.Marker({
-        map: map,
-        position: center,
-        draggable: true,
-      });
-      
-      selectedLocation = center;
-      
-      map.addListener('click', (e) => {
-        const lat = e.latLng.lat();
-        const lng = e.latLng.lng();
-        marker.setPosition({ lat, lng });
-        selectedLocation = { lat, lng };
-      });
-      
-      marker.addListener('dragend', (e) => {
-        const lat = e.latLng.lat();
-        const lng = e.latLng.lng();
-        selectedLocation = { lat, lng };
-      });
+      try {
+        const response = await fetch(
+          \`https://nominatim.openstreetmap.org/search?format=json&q=\${encodeURIComponent(query)}&limit=1\`
+        );
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+          const result = data[0];
+          const lat = parseFloat(result.lat);
+          const lng = parseFloat(result.lon);
+          
+          // Move map and marker to searched location
+          map.setView([lat, lng], 15);
+          marker.setLatLng([lat, lng]);
+          selectedLocation = { lat, lng };
+        } else {
+          alert('Location not found. Try a different search term.');
+        }
+      } catch (error) {
+        alert('Search failed. Please try again.');
+      } finally {
+        loading.classList.add('hidden');
+      }
     }
+    
+    // Allow Enter key to search
+    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        searchLocation();
+      }
+    });
     
     function confirmLocation() {
       if (selectedLocation) {
@@ -269,7 +408,11 @@ const AddFlyerScreen = ({ navigation }) => {
       }
     }
     
-    initMap();
+    // Auto-send location updates
+    map.on('moveend', function() {
+      const center = map.getCenter();
+      selectedLocation = { lat: center.lat, lng: center.lng };
+    });
   </script>
 </body>
 </html>
@@ -522,7 +665,7 @@ const AddFlyerScreen = ({ navigation }) => {
             onPress={openMapPicker}
           >
             <Text style={styles.mapButtonText}>
-              {Platform.OS === 'ios' ? '🗺️ Select on Map (Google)' : '🗺️ Select on Interactive Map'}
+              🗺️ Select on Interactive Map
             </Text>
           </TouchableOpacity>
 
@@ -648,6 +791,8 @@ const AddFlyerScreen = ({ navigation }) => {
             javaScriptEnabled={true}
             domStorageEnabled={true}
             startInLoadingState={true}
+            cacheEnabled={false}
+            incognito={true}
             renderLoading={() => (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#007AFF" />
@@ -655,6 +800,21 @@ const AddFlyerScreen = ({ navigation }) => {
               </View>
             )}
           />
+          
+          <View style={styles.mapButtonContainer}>
+            <TouchableOpacity 
+              style={styles.mapConfirmButton}
+              onPress={() => {
+                if (tempMapLocation) {
+                  setCustomLocation(tempMapLocation);
+                  setShowMapModal(false);
+                  Alert.alert('Location Selected', `Coordinates:\nLatitude: ${tempMapLocation.latitude.toFixed(6)}\nLongitude: ${tempMapLocation.longitude.toFixed(6)}`);
+                }
+              }}
+            >
+              <Text style={styles.mapConfirmButtonText}>Confirm Location</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </Modal>
     </ScrollView>
@@ -913,6 +1073,36 @@ const styles = StyleSheet.create({
   },
   webview: {
     flex: 1,
+  },
+  mapButtonContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+  },
+  mapConfirmButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderRadius: 10,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  mapConfirmButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
   },
   loadingContainer: {
     position: 'absolute',
