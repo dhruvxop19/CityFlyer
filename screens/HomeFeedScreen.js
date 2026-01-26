@@ -8,11 +8,14 @@ import {
   TouchableOpacity, 
   ActivityIndicator 
 } from 'react-native';
+import { useAuth, useUser } from '@clerk/clerk-expo';
 import FlyerService from '../services/FlyerService';
 import LocationService from '../services/LocationService';
 import { getErrorInfo, ErrorTypes } from '../utils/ErrorHandler';
 
 const HomeFeedScreen = ({ navigation }) => {
+  const { signOut, isSignedIn } = useAuth();
+  const { user } = useUser();
   const [flyers, setFlyers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -188,13 +191,26 @@ const HomeFeedScreen = ({ navigation }) => {
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerRow}>
-          <Text style={styles.title}>City Flyers</Text>
-          <TouchableOpacity
-            style={styles.headerButton}
-            onPress={() => navigation.navigate('AddFlyer')}
-          >
-            <Text style={styles.headerButtonText}>+ Add</Text>
-          </TouchableOpacity>
+          <View>
+            <Text style={styles.title}>City Flyers</Text>
+            {user?.primaryEmailAddress && (
+              <Text style={styles.userEmail}>{user.primaryEmailAddress.emailAddress}</Text>
+            )}
+          </View>
+          <View style={styles.headerButtons}>
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={() => navigation.navigate('AddFlyer')}
+            >
+              <Text style={styles.headerButtonText}>+ Add</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.headerButton, styles.signOutButton]}
+              onPress={() => signOut()}
+            >
+              <Text style={styles.headerButtonText}>Sign Out</Text>
+            </TouchableOpacity>
+          </View>
         </View>
         <Text style={styles.subtitle}>
           {flyers.length} flyers near you
@@ -253,6 +269,11 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     color: '#333',
+  },
+  userEmail: {
+    fontSize: 13,
+    color: '#666',
+    marginTop: 2,
   },
   subtitle: {
     fontSize: 16,
@@ -383,12 +404,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
   },
+  headerButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
   headerButton: {
-    marginRight: 15,
     paddingHorizontal: 12,
     paddingVertical: 6,
     backgroundColor: '#007AFF',
     borderRadius: 8,
+  },
+  signOutButton: {
+    backgroundColor: '#FF3B30',
   },
   headerButtonText: {
     color: '#fff',

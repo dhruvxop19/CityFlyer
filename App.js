@@ -1,10 +1,32 @@
 import { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView, StyleSheet } from 'react-native';
+import { ClerkProvider, SignedIn, SignedOut } from '@clerk/clerk-expo';
+import * as SecureStore from 'expo-secure-store';
+import { CLERK_PUBLISHABLE_KEY } from './clerk.config';
 
 import HomeFeedScreen from './screens/HomeFeedScreen';
 import AddFlyerScreen from './screens/AddFlyerScreen';
 import FlyerDetailScreen from './screens/FlyerDetailScreen';
+import SignInScreen from './screens/SignInScreen';
+
+// Token cache for Clerk
+const tokenCache = {
+  async getToken(key) {
+    try {
+      return SecureStore.getItemAsync(key);
+    } catch (err) {
+      return null;
+    }
+  },
+  async saveToken(key, value) {
+    try {
+      return SecureStore.setItemAsync(key, value);
+    } catch (err) {
+      return;
+    }
+  },
+};
 
 // Simple state-based navigation context
 export const NavigationContext = {
@@ -15,6 +37,17 @@ export const NavigationContext = {
 };
 
 export default function App() {
+  return (
+    <ClerkProvider 
+      publishableKey={CLERK_PUBLISHABLE_KEY}
+      tokenCache={tokenCache}
+    >
+      <AppContent />
+    </ClerkProvider>
+  );
+}
+
+function AppContent() {
   const [currentScreen, setCurrentScreen] = useState('HomeFeed');
   const [screenParams, setScreenParams] = useState({});
   const [history, setHistory] = useState(['HomeFeed']);
@@ -61,7 +94,12 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {renderScreen()}
+      <SignedIn>
+        {renderScreen()}
+      </SignedIn>
+      <SignedOut>
+        <SignInScreen />
+      </SignedOut>
       <StatusBar style="auto" />
     </SafeAreaView>
   );
