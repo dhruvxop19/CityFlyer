@@ -9,11 +9,17 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  Modal,
+  Dimensions,
 } from 'react-native';
+import { WebView } from 'react-native-webview';
 import * as ImagePicker from 'expo-image-picker';
+import * as Location from 'expo-location';
 import LocationService from '../services/LocationService';
 import FlyerService from '../services/FlyerService';
 import { getErrorInfo, ErrorTypes } from '../utils/ErrorHandler';
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const CATEGORIES = ['event', 'service', 'sale', 'announcement'];
 const RADIUS_OPTIONS = [
@@ -30,6 +36,193 @@ const AddFlyerScreen = ({ navigation }) => {
   const [radius, setRadius] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState('');
+  
+  // Location selection state
+  const [locationType, setLocationType] = useState('current'); // 'current' or 'custom'
+  const [customAddress, setCustomAddress] = useState('');
+  const [customLocation, setCustomLocation] = useState(null);
+  const [isGeocodingAddress, setIsGeocodingAddress] = useState(false);
+  const [manualLat, setManualLat] = useState('');
+  const [manualLng, setManualLng] = useState('');
+  const [showMapModal, setShowMapModal] = useState(false);
+  const [mapCenter, setMapCenter] = useState({ lat: 40.7580, lng: -73.9855 });
+
+  const geocodeAddress = async () => {
+    if (!customAddress.trim()) {
+      Alert.alert('Missing Address', 'Please enter an address or location.');
+      return;
+    }
+
+    setIsGeocodingAddress(true);
+    try {
+      const results = await Location.geocodeAsync(customAddress);
+      
+      if (results && results.length > 0) {
+        const { latitude, longitude } = results[0];
+        setCustomLocation({ latitude, longitude });
+        Alert.alert('Success', `Location found:\nLatitude: ${latitude.toFixed(6)}\nLongitude: ${longitude.toFixed(6)}`);
+      } else {
+        Alert.alert('Location Not Found', 'Could not find the specified address. Please try a different address or enter coordinates manually.');
+      }
+    } catch (error) {
+      console.error('Geocoding error:', error);
+      Alert.alert('Error', 'Failed to find location. Please check the address and try again or enter coordinates manually.');
+    } finally {
+      setIsGeocodingAddress(false);
+    }
+  };
+
+  const setManualCoordinates = () => {
+    const lat = parseFloat(manualLat);
+    const lng = parseFloat(manualLng);
+    
+    if (isNaN(lat) || isNaN(lng)) {
+      Alert.alert('Invalid Coordinates', 'Please enter valid numbers for latitude and longitude.');
+      return;
+    }
+    
+    if (lat < -90 || lat > 90) {
+      Alert.alert('Invalid Latitude', 'Latitude must be between -90 and 90.');
+      return;
+    }
+    
+    if (lng < -180 || lng > 180) {
+      Alert.alert('Invalid Longitude', 'Longitude must be between -180 and 180.');
+      return;
+    }
+    
+    setCustomLocation({ latitude: lat, longitude: lng });
+    Alert.alert('Success', `Coordinates set:\nLatitude: ${lat.toFixed(6)}\nLongitude: ${lng.toFixed(6)}`);
+  };
+
+  const openMapPicker = async () => {
+    // Get current location to center the map
+    const locationResult = await LocationService.getCurrentLocation();
+    if (locationResult.location) {
+      setMapCenter({
+        lat: locationResult.location.latitude,
+        lng: locationResult.location.longitude,
+      });
+    }
+    setShowMapModal(true);
+  };
+
+  const handleMapMessage = (event) => {
+    try {
+      const data = JSON.parse(event.nativeEvent.data);
+      if (data.type === 'locationSelected') {
+        setCustomLocation({
+          latitude: data.latitude,
+          longitude: data.longitude,
+        });
+        setShowMapModal(false);
+        Alert.alert('Location Selected', `Coordinates:\nLatitude: ${data.latitude.toFixed(6)}\nLongitude: ${data.longitude.toFixed(6)}`);
+      }
+    } catch (error) {
+      console.error('Error parsing map message:', error);
+    }
+  };
+
+  const getMapHTML = () => {
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body, html { margin: 0; padding: 0; height: 100%; }
+    #map { height: 100%; width: 100%; }
+    .instructions {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      z-index: 1000;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+    .confirm-btn {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #007AFF;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      z-index: 1000;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="instructions">Tap on the map to select a location</div>
+  <div id="map"></div>
+  <button class="confirm-btn" onclick="confirmLocation()">Confirm Location</button>
+  
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBg4AcujbKNc2eirrbmVvsWG0LjwVaLGI8"></script>
+  <script>
+    let map;
+    let marker;
+    let selectedLocation = null;
+    
+    function initMap() {
+      const center = { lat: ${mapCenter.lat}, lng: ${mapCenter.lng} };
+      
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: center,
+        zoom: 13,
+        mapTypeControl: true,
+        streetViewControl: false,
+        fullscreenControl: false,
+      });
+      
+      marker = new google.maps.Marker({
+        map: map,
+        position: center,
+        draggable: true,
+      });
+      
+      selectedLocation = center;
+      
+      map.addListener('click', (e) => {
+        const lat = e.latLng.lat();
+        const lng = e.latLng.lng();
+        marker.setPosition({ lat, lng });
+        selectedLocation = { lat, lng };
+      });
+      
+      marker.addListener('dragend', (e) => {
+        const lat = e.latLng.lat();
+        const lng = e.latLng.lng();
+        selectedLocation = { lat, lng };
+      });
+    }
+    
+    function confirmLocation() {
+      if (selectedLocation) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({
+          type: 'locationSelected',
+          latitude: selectedLocation.lat,
+          longitude: selectedLocation.lng,
+        }));
+      }
+    }
+    
+    initMap();
+  </script>
+</body>
+</html>
+    `;
+  };
 
   const pickImage = async () => {
     try {
@@ -85,6 +278,10 @@ const AddFlyerScreen = ({ navigation }) => {
       Alert.alert('Missing Radius', 'Please select a visibility radius for your flyer.');
       return false;
     }
+    if (locationType === 'custom' && !customLocation) {
+      Alert.alert('Missing Location', 'Please search for a location or use your current location.');
+      return false;
+    }
     return true;
   };
 
@@ -92,28 +289,35 @@ const AddFlyerScreen = ({ navigation }) => {
     if (!validateForm()) return;
 
     setIsSubmitting(true);
-    setSubmissionStatus('Getting your location...');
     
     try {
-      // Capture current GPS location with enhanced error handling
-      const locationResult = await LocationService.getCurrentLocation();
+      let flyerLocation;
       
-      if (locationResult.error) {
-        const errorInfo = getErrorInfo(locationResult.error);
-        Alert.alert(errorInfo.title, errorInfo.message);
-        setIsSubmitting(false);
-        setSubmissionStatus('');
-        return;
-      }
+      if (locationType === 'custom' && customLocation) {
+        // Use custom location
+        setSubmissionStatus('Using custom location...');
+        flyerLocation = customLocation;
+      } else {
+        // Get current location
+        setSubmissionStatus('Getting your location...');
+        const locationResult = await LocationService.getCurrentLocation();
+        
+        if (locationResult.error) {
+          const errorInfo = getErrorInfo(locationResult.error);
+          Alert.alert(errorInfo.title, errorInfo.message);
+          setIsSubmitting(false);
+          setSubmissionStatus('');
+          return;
+        }
 
-      if (!locationResult.location) {
-        Alert.alert(
-          'Location Error',
-          'Unable to get your current location. Please enable location services and try again.'
-        );
-        setIsSubmitting(false);
-        setSubmissionStatus('');
-        return;
+        if (!locationResult.location) {
+          Alert.alert('Location Error', 'Unable to get your current location.');
+          setIsSubmitting(false);
+          setSubmissionStatus('');
+          return;
+        }
+        
+        flyerLocation = locationResult.location;
       }
 
       setSubmissionStatus('Processing image...');
@@ -122,8 +326,8 @@ const AddFlyerScreen = ({ navigation }) => {
         title: title.trim(),
         description: description.trim(),
         category,
-        lat: locationResult.location.latitude,
-        lng: locationResult.location.longitude,
+        lat: flyerLocation.latitude,
+        lng: flyerLocation.longitude,
         radius,
       };
 
@@ -221,6 +425,102 @@ const AddFlyerScreen = ({ navigation }) => {
         ))}
       </View>
 
+      {/* Location Selector */}
+      <Text style={styles.label}>Location</Text>
+      <View style={styles.optionsContainer}>
+        <TouchableOpacity 
+          style={[styles.optionButton, locationType === 'current' && styles.optionButtonSelected]} 
+          onPress={() => setLocationType('current')}
+        >
+          <Text style={[styles.optionText, locationType === 'current' && styles.optionTextSelected]}>Current Location</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.optionButton, locationType === 'custom' && styles.optionButtonSelected]} 
+          onPress={() => setLocationType('custom')}
+        >
+          <Text style={[styles.optionText, locationType === 'custom' && styles.optionTextSelected]}>Custom Location</Text>
+        </TouchableOpacity>
+      </View>
+
+      {locationType === 'custom' && (
+        <View style={styles.customLocationContainer}>
+          <Text style={styles.sectionTitle}>Search by Address</Text>
+          <TextInput 
+            style={styles.input} 
+            placeholder="Enter address (e.g., Times Square, New York)" 
+            value={customAddress} 
+            onChangeText={setCustomAddress}
+          />
+          <TouchableOpacity 
+            style={[styles.searchButton, isGeocodingAddress && styles.searchButtonDisabled]} 
+            onPress={geocodeAddress}
+            disabled={isGeocodingAddress}
+          >
+            {isGeocodingAddress ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.searchButtonText}>🔍 Search Location</Text>
+            )}
+          </TouchableOpacity>
+          
+          <Text style={styles.orText}>OR</Text>
+          
+          <TouchableOpacity 
+            style={styles.mapButton} 
+            onPress={openMapPicker}
+          >
+            <Text style={styles.mapButtonText}>🗺️ Select on Interactive Map</Text>
+          </TouchableOpacity>
+          
+          <Text style={styles.orText}>OR</Text>
+          
+          <Text style={styles.sectionTitle}>Enter Coordinates Manually</Text>
+          <Text style={styles.helpText}>
+            You can find coordinates on Google Maps by right-clicking a location
+          </Text>
+          <View style={styles.coordinateRow}>
+            <View style={styles.coordinateInput}>
+              <Text style={styles.coordinateLabel}>Latitude</Text>
+              <TextInput 
+                style={styles.input} 
+                placeholder="e.g., 40.7580" 
+                value={manualLat} 
+                onChangeText={setManualLat}
+                keyboardType="numeric"
+              />
+            </View>
+            <View style={styles.coordinateInput}>
+              <Text style={styles.coordinateLabel}>Longitude</Text>
+              <TextInput 
+                style={styles.input} 
+                placeholder="e.g., -73.9855" 
+                value={manualLng} 
+                onChangeText={setManualLng}
+                keyboardType="numeric"
+              />
+            </View>
+          </View>
+          <TouchableOpacity 
+            style={styles.setCoordinatesButton} 
+            onPress={setManualCoordinates}
+          >
+            <Text style={styles.setCoordinatesButtonText}>📍 Set Coordinates</Text>
+          </TouchableOpacity>
+          
+          {customLocation && (
+            <View style={styles.locationInfo}>
+              <Text style={styles.locationInfoTitle}>✓ Location Selected</Text>
+              <Text style={styles.locationInfoText}>
+                Latitude: {customLocation.latitude.toFixed(6)}
+              </Text>
+              <Text style={styles.locationInfoText}>
+                Longitude: {customLocation.longitude.toFixed(6)}
+              </Text>
+            </View>
+          )}
+        </View>
+      )}
+
       {/* Radius Selector */}
       <Text style={styles.label}>Visibility Radius</Text>
       <View style={styles.optionsContainer}>
@@ -262,6 +562,38 @@ const AddFlyerScreen = ({ navigation }) => {
           <Text style={styles.submitButtonText}>Post Flyer</Text>
         )}
       </TouchableOpacity>
+
+      {/* Map Modal */}
+      <Modal
+        visible={showMapModal}
+        animationType="slide"
+        onRequestClose={() => setShowMapModal(false)}
+      >
+        <View style={styles.mapModalContainer}>
+          <View style={styles.mapHeader}>
+            <TouchableOpacity onPress={() => setShowMapModal(false)}>
+              <Text style={styles.mapHeaderButton}>Cancel</Text>
+            </TouchableOpacity>
+            <Text style={styles.mapHeaderTitle}>Select Location</Text>
+            <View style={{ width: 60 }} />
+          </View>
+          
+          <WebView
+            source={{ html: getMapHTML() }}
+            style={styles.webview}
+            onMessage={handleMapMessage}
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+            startInLoadingState={true}
+            renderLoading={() => (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#007AFF" />
+                <Text style={styles.loadingText}>Loading map...</Text>
+              </View>
+            )}
+          />
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
@@ -395,6 +727,141 @@ const styles = StyleSheet.create({
   headerButtonText: {
     color: '#007AFF',
     fontSize: 16,
+  },
+  customLocationContainer: {
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
+    marginTop: 8,
+  },
+  helpText: {
+    fontSize: 13,
+    color: '#888',
+    marginBottom: 8,
+    fontStyle: 'italic',
+  },
+  searchButton: {
+    backgroundColor: '#34c759',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  searchButtonDisabled: {
+    backgroundColor: '#ccc',
+  },
+  searchButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  orText: {
+    textAlign: 'center',
+    color: '#888',
+    fontSize: 14,
+    marginVertical: 12,
+    fontWeight: '600',
+  },
+  coordinateRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 12,
+  },
+  coordinateInput: {
+    flex: 1,
+  },
+  coordinateLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+    marginBottom: 4,
+  },
+  setCoordinatesButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  setCoordinatesButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  mapButton: {
+    backgroundColor: '#FF9500',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  mapButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  locationInfo: {
+    backgroundColor: '#e8f5e9',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#4caf50',
+  },
+  locationInfoTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#2e7d32',
+    marginBottom: 6,
+  },
+  locationInfoText: {
+    fontSize: 14,
+    color: '#2e7d32',
+    marginBottom: 2,
+  },
+  mapModalContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  mapHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 15,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    paddingTop: 50,
+  },
+  mapHeaderTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  mapHeaderButton: {
+    fontSize: 16,
+    color: '#007AFF',
+  },
+  webview: {
+    flex: 1,
+  },
+  loadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#666',
   },
 });
 
