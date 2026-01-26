@@ -19,13 +19,23 @@ This app now uses Clerk for authentication. Follow these steps to set it up:
 
 In your Clerk dashboard:
 
+### Email + Password (Already Working)
 1. Go to **User & Authentication** → **Email, Phone, Username**
 2. Enable **Email address** (required)
 3. Enable **Password** authentication
 4. Make sure **Email verification** is enabled (recommended)
-5. Save your changes
+
+### Google OAuth (One-Click Sign In)
+1. Go to **User & Authentication** → **Social Connections**
+2. Click on **Google**
+3. Toggle **Enable for sign-up and sign-in**
+4. Clerk provides default OAuth credentials for development
+5. For production, you'll need to add your own Google OAuth credentials
+
+**Note:** Google OAuth works immediately in development mode with Clerk's default credentials. No additional setup needed for testing!
 
 The app now supports:
+- ✅ Google OAuth (one-click sign in)
 - ✅ Email + Password sign up
 - ✅ Email + Password sign in
 - ✅ Email verification with code
@@ -40,7 +50,14 @@ The app now supports:
 
 ## 5. How to Use
 
-### Sign Up (New Users)
+### Option 1: Google Sign In (Easiest - One Click!)
+
+1. Open the app in Expo Go
+2. Click "Continue with Google"
+3. Select your Google account
+4. You're signed in instantly!
+
+### Option 2: Sign Up (New Users)
 
 1. Open the app in Expo Go
 2. You'll see the sign-in screen
@@ -51,7 +68,7 @@ The app now supports:
 7. Enter the 6-digit code
 8. You're now signed in!
 
-### Sign In (Existing Users)
+### Option 3: Sign In (Existing Users)
 
 1. Open the app in Expo Go
 2. Enter your email and password
